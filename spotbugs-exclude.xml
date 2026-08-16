@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+	<!-- FindSecBugs treats the Hikari property key as a password value. The value comes from DB_PASSWORD. -->
+	<Match>
+		<Bug pattern="HARD_CODE_PASSWORD" />
+		<Class name="org.zerock.config.RootConfig" />
+		<Method name="dataSource" />
+	</Match>
+</FindBugsFilter>
