@@ -16,11 +16,11 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.zerock.config.RootConfig;
 
 import lombok.Setter;
-import lombok.extern.log4j.Log4j;
+import lombok.extern.slf4j.Slf4j;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = { RootConfig.class })
-@Log4j
+@Slf4j
 public class DataSourceTests {
 	@Setter(onMethod_ = { @Autowired })
 	private DataSource dataSource;
@@ -28,7 +28,7 @@ public class DataSourceTests {
 	@Test
 	public void testConnection() {
 		try (Connection con = dataSource.getConnection()) {
-			log.info(con);
+			log.info("{}", con);
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
@@ -40,8 +40,8 @@ public class DataSourceTests {
 	@Test
 	public void testMyBatis() {
 		try (SqlSession session = sqlSessionFactory.openSession(); Connection conn = session.getConnection();) {
-			log.info(session);
-			log.info(conn);
+			log.info("{}", session);
+			log.info("{}", conn);
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}

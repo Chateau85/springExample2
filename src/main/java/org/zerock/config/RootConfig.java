@@ -1,5 +1,7 @@
 package org.zerock.config;
 
+import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -18,22 +20,34 @@ import com.zaxxer.hikari.HikariDataSource;
 public class RootConfig {
 	@Bean
 	public DataSource dataSource() {
-		HikariConfig hikariConfig = new HikariConfig();
-		// hikariConfig.setDriverClassName("oracle.jdbc.driver.OracleDriver");
-		// hikariConfig.setJdbcUrl("jdbc:oracle:thin:@localhost:1521:XE");
+		String jdbcUrl = System.getenv("DB_URL");
+		String username = System.getenv("DB_USERNAME");
+		String password = System.getenv("DB_PASSWORD");
+		requireValue("DB_URL", jdbcUrl);
+		requireValue("DB_USERNAME", username);
+		requireValue("DB_PASSWORD", password);
 
-		hikariConfig.setDriverClassName("net.sf.log4jdbc.sql.jdbcapi.DriverSpy");
-		hikariConfig.setJdbcUrl("jdbc:log4jdbc:oracle:thin:@localhost:1521:XE");
-		hikariConfig.setUsername("book_ex");
-		hikariConfig.setPassword("book_ex");
-		HikariDataSource dataSource = new HikariDataSource(hikariConfig);
-		return dataSource;
+		Properties properties = new Properties();
+		properties.setProperty("driverClassName", "oracle.jdbc.OracleDriver");
+		properties.setProperty("jdbcUrl", jdbcUrl);
+		properties.setProperty("username", username);
+		properties.setProperty("password", password);
+		properties.setProperty("initializationFailTimeout", "-1");
+		properties.setProperty("minimumIdle", "0");
+		HikariConfig hikariConfig = new HikariConfig(properties);
+		return new HikariDataSource(hikariConfig);
 	}
 
 	@Bean
 	public SqlSessionFactory sqlSessionFactory() throws Exception {
 		SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
 		sqlSessionFactoryBean.setDataSource(dataSource());
-		return (SqlSessionFactory) sqlSessionFactoryBean.getObject();
+		return sqlSessionFactoryBean.getObject();
+	}
+
+	private static void requireValue(String name, String value) {
+		if (value == null || value.trim().isEmpty()) {
+			throw new IllegalStateException(name + " environment variable is required");
+		}
 	}
 }
